@@ -47,7 +47,6 @@ namespace HaCreator.MapEditor.Text
         private CharTexture RasterizeCharacter(char ch)
         {
             string text = ch.ToString();
-
             // Causes truetype fonts to be rendered in their exact width
             StringFormat format = StringFormat.GenericTypographic;
             SizeF size = globalGraphics.MeasureString(text, font, new PointF(0, 0), format);
@@ -61,7 +60,6 @@ namespace HaCreator.MapEditor.Text
 
             int width = (int)Math.Ceiling(size.Width);
             int height = (int)Math.Ceiling(size.Height);
-
             Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
 
             using (Graphics graphics = Graphics.FromImage(bitmap))
@@ -82,19 +80,34 @@ namespace HaCreator.MapEditor.Text
             if (UserSettings.ClipText && globalGraphics.MeasureString(str, font).Width > maxWidth)
             {
                 int dotsWidth = (int)globalGraphics.MeasureString("...", font, new PointF(0, 0), StringFormat.GenericTypographic).Width;
+
                 do
                 {
                     str = str.Substring(0, str.Length - 1);
                 }
                 while (globalGraphics.MeasureString(str, font).Width + dotsWidth > maxWidth);
+
                 str += "...";
             }
+
             int xOffs = 0;
+
             foreach (char c in str.ToCharArray())
             {
-                int w = characters[c].w;
-                int h = characters[c].h;
-                sprite.Draw(characters[c].texture, new Microsoft.Xna.Framework.Rectangle(position.X + xOffs, position.Y, w, h), color);
+                CharTexture texture;
+
+                if (c > characters.Length || c < 0)
+                {
+                    texture = RasterizeCharacter(c);
+                }
+                else
+                {
+                    texture = characters[c];
+                }
+
+                int w = texture.w;
+                int h = texture.h;
+                sprite.Draw(texture.texture, new Microsoft.Xna.Framework.Rectangle(position.X + xOffs, position.Y, w, h), color);
                 xOffs += w;
             }
         }

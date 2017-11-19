@@ -81,10 +81,12 @@ namespace HaCreator.Wz
                 wzFiles[name] = wzf;
                 wzFilesUpdated[wzf] = false;
                 wzDirs[name] = new WzMainDirectory(wzf);
+
                 foreach (WzDirectory mainDir in wzf.WzDirectory.WzDirectories)
                 {
                     wzDirs[mainDir.Name.ToLower()] = new WzMainDirectory(wzf, mainDir);
                 }
+
                 return true;
             }
             catch (Exception e)
@@ -106,30 +108,20 @@ namespace HaCreator.Wz
             return wzDirs[name.ToLower()];
         }
 
-        public WzDirectory this[string name]
-        {
-            get { return wzDirs[name.ToLower()].MainDir; }
-        }
+        public WzDirectory this[string name] => wzDirs[name.ToLower()].MainDir;
 
-        public WzDirectory String
-        {
-            get { return GetMainDirectoryByName("string").MainDir; }
-        }
+        public WzDirectory String => GetMainDirectoryByName("string").MainDir;
 
-        public bool HasDataFile
-        {
-            get { return File.Exists(Path.Combine(baseDir, "Data.wz")); }
-        }
-
-        public string BaseDir
-        {
-            get { return baseDir; }
-        }
+        public bool HasDataFile => File.Exists(Path.Combine(baseDir, "Data.wz"));
+        
+        public string BaseDir => baseDir;
 
         public void ExtractMobFile()
         {
             WzImage mobImage = (WzImage)String["Mob.img"];
+
             if (!mobImage.Parsed) mobImage.ParseImage();
+
             foreach (WzSubProperty mob in mobImage.WzProperties)
             {
                 WzStringProperty nameProp = (WzStringProperty)mob["name"];
@@ -141,7 +133,9 @@ namespace HaCreator.Wz
         public void ExtractNpcFile()
         {
             WzImage npcImage = (WzImage)String["Npc.img"];
+
             if (!npcImage.Parsed) npcImage.ParseImage();
+
             foreach (WzSubProperty npc in npcImage.WzProperties)
             {
                 WzStringProperty nameProp = (WzStringProperty)npc["name"];
@@ -164,15 +158,42 @@ namespace HaCreator.Wz
             foreach (WzImage soundImage in this["sound"].WzImages)
             {
                 if (!soundImage.Name.ToLower().Contains("bgm")) continue;
+
                 if (!soundImage.Parsed) soundImage.ParseImage();
-                foreach (WzSoundProperty bgm in soundImage.WzProperties)
-                    Program.InfoManager.BGMs[WzInfoTools.RemoveExtension(soundImage.Name) + @"/" + bgm.Name] = bgm;
+
+                foreach (WzImageProperty bgm in soundImage.WzProperties)
+                {
+                    try
+                    {
+                        WzSoundProperty sound = bgm as WzSoundProperty;
+                        string name = WzInfoTools.RemoveExtension(soundImage.Name) + @"/" + bgm.Name;
+
+                        if (bgm is WzUOLProperty)
+                        {
+                            sound = SolveUOLProperty<WzSoundProperty>((WzUOLProperty)bgm);
+                            Program.InfoManager.BGMs[WzInfoTools.RemoveExtension(soundImage.Name) + @"/" + sound.Name] = sound;
+                        }
+
+                        Program.InfoManager.BGMs[name] = sound;
+                    }
+                    catch (Exception e)
+                    {
+                        int ia = 0;
+                        ia++;
+                    }
+                }
             }
+        }
+
+        private T SolveUOLProperty<T>(WzUOLProperty link) where T : WzImageProperty
+        {
+            return (T)link.LinkValue;
         }
 
         public void ExtractMapMarks()
         {
             WzImage mapHelper = (WzImage)this["map"]["MapHelper.img"];
+
             foreach (WzCanvasProperty mark in mapHelper["mark"].WzProperties)
                 Program.InfoManager.MapMarks[mark.Name] = mark.PngProperty.GetPNG(false);
         }
@@ -180,6 +201,7 @@ namespace HaCreator.Wz
         public void ExtractTileSets()
         {
             WzDirectory tileParent = (WzDirectory)this["map"]["Tile"];
+
             foreach (WzImage tileset in tileParent.WzImages)
                 Program.InfoManager.TileSets[WzInfoTools.RemoveExtension(tileset.Name)] = tileset;
         }
@@ -187,6 +209,7 @@ namespace HaCreator.Wz
         public void ExtractObjSets()
         {
             WzDirectory objParent = (WzDirectory)this["map"]["Obj"];
+
             foreach (WzImage objset in objParent.WzImages)
                 Program.InfoManager.ObjectSets[WzInfoTools.RemoveExtension(objset.Name)] = objset;
         }
@@ -194,6 +217,7 @@ namespace HaCreator.Wz
         public void ExtractBackgroundSets()
         {
             WzDirectory bgParent = (WzDirectory)this["map"]["Back"];
+
             foreach (WzImage bgset in bgParent.WzImages)
                 Program.InfoManager.BackgroundSets[WzInfoTools.RemoveExtension(bgset.Name)] = bgset;
         }
@@ -201,21 +225,24 @@ namespace HaCreator.Wz
         public void ExtractMaps()
         {
             WzImage mapStringsParent = (WzImage)String["Map.img"];
+
             if (!mapStringsParent.Parsed) mapStringsParent.ParseImage();
+
             foreach (WzSubProperty mapCat in mapStringsParent.WzProperties)
             {
                 foreach (WzSubProperty map in mapCat.WzProperties)
                 {
                     WzStringProperty mapName = (WzStringProperty)map["mapName"];
                     string id;
-                    if (map.Name.Length == 9) 
+
+                    if (map.Name.Length == 9)
                         id = map.Name;
-                    else 
+                    else
                         id = WzInfoTools.AddLeadingZeros(map.Name, 9);
 
-                    if (mapName == null) 
+                    if (mapName == null)
                         Program.InfoManager.Maps[id] = "";
-                    else 
+                    else
                         Program.InfoManager.Maps[id] = mapName.Value;
                 }
             }
@@ -225,29 +252,37 @@ namespace HaCreator.Wz
         {
             WzSubProperty portalParent = (WzSubProperty)this["map"]["MapHelper.img"]["portal"];
             WzSubProperty editorParent = (WzSubProperty)portalParent["editor"];
+
             for (int i = 0; i < editorParent.WzProperties.Count; i++)
             {
                 WzCanvasProperty portal = (WzCanvasProperty)editorParent.WzProperties[i];
                 Program.InfoManager.PortalTypeById.Add(portal.Name);
                 PortalInfo.Load(portal);
             }
+
             WzSubProperty gameParent = (WzSubProperty)portalParent["game"];
+
             foreach (WzSubProperty portal in gameParent.WzProperties)
             {
                 if (portal.WzProperties[0] is WzSubProperty)
                 {
                     Dictionary<string, Bitmap> images = new Dictionary<string, Bitmap>();
                     Bitmap defaultImage = null;
+
                     foreach (WzSubProperty image in portal.WzProperties)
                     {
                         WzSubProperty portalContinue = (WzSubProperty)image["portalContinue"];
+
                         if (portalContinue == null) continue;
+
                         Bitmap portalImage = portalContinue["0"].GetBitmap();
+
                         if (image.Name == "default")
                             defaultImage = portalImage;
                         else
                             images.Add(image.Name, portalImage);
                     }
+
                     Program.InfoManager.GamePortals.Add(portal.Name, new PortalGameImageInfo(defaultImage, images));
                 }
             }
@@ -258,16 +293,16 @@ namespace HaCreator.Wz
             }
         }
 
-/*        public void ExtractItems()
-        {
-            WzImage consImage = (WzImage)String["Consume.img"];
-            if (!consImage.Parsed) consImage.ParseImage();
-            foreach (WzSubProperty item in consImage.WzProperties)
-            {
-                WzStringProperty nameProp = (WzStringProperty)item["name"];
-                string name = nameProp == null ? "" : nameProp.Value;
-                Program.InfoManager.Items.Add(WzInfoTools.AddLeadingZeros(item.Name, 7), name);
-            }
-        }*/
+        /*        public void ExtractItems()
+                {
+                    WzImage consImage = (WzImage)String["Consume.img"];
+                    if (!consImage.Parsed) consImage.ParseImage();
+                    foreach (WzSubProperty item in consImage.WzProperties)
+                    {
+                        WzStringProperty nameProp = (WzStringProperty)item["name"];
+                        string name = nameProp == null ? "" : nameProp.Value;
+                        Program.InfoManager.Items.Add(WzInfoTools.AddLeadingZeros(item.Name, 7), name);
+                    }
+                }*/
     }
 }

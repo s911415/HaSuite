@@ -63,12 +63,19 @@ namespace HaCreator
         public static double ScrollExponentFactor = 1;
         public static int zShift = 1;
         public static int HiddenLifeR = 127;
-        public static string FontName = "Arial";
+        private static string _FontName = "Microsoft YaHei";
         public static int FontSize = 15;
         public static System.Drawing.FontStyle FontStyle = System.Drawing.FontStyle.Regular;
         public static int dotDescriptionBoxSize = 100;
         public static int ImageViewerHeight = 100;
         public static int ImageViewerWidth = 100;
+        public static string FontName
+        {
+            get
+            {
+                return _FontName;
+            }
+        }
 
         public static bool useMiniMap = true;
         public static bool useSnapping = true;

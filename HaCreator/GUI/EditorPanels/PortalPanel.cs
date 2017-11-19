@@ -32,11 +32,19 @@ namespace HaCreator.GUI.EditorPanels
 
             foreach (string pt in Program.InfoManager.PortalTypeById)
             {
-                PortalInfo pInfo = PortalInfo.GetPortalInfoByType(pt);
-                ImageViewer item = portalImageContainer.Add(pInfo.Image, Tables.PortalTypeNames[pt], true);
-                item.Tag = pInfo;
-                item.MouseDown += new MouseEventHandler(portal_MouseDown);
-                item.MouseUp += new MouseEventHandler(ImageViewer.item_MouseUp);
+                try
+                {
+                    PortalInfo pInfo = PortalInfo.GetPortalInfoByType(pt);
+                    ImageViewer item = portalImageContainer.Add(pInfo.Image, Tables.PortalTypeNames[pt], true);
+                    item.Tag = pInfo;
+                    item.MouseDown += new MouseEventHandler(portal_MouseDown);
+                    item.MouseUp += new MouseEventHandler(ImageViewer.item_MouseUp);
+                }
+                catch (Exception e)
+                {
+                    int i = 0;
+                    i++;
+                }
             }
         }
 

@@ -398,8 +398,15 @@ namespace HaRepacker.GUI
                 UpdateProgressBar(MainPanel.mainProgressBar, objsToDump.Count, true, true);
                 foreach (WzObject obj in objsToDump)
                 {
-                    ((IWzObjectSerializer)serializer).SerializeObject(obj, path);
-                    UpdateProgressBar(MainPanel.mainProgressBar, 1, false, false);
+                    try
+                    {
+                        ((IWzObjectSerializer)serializer).SerializeObject(obj, path);
+                    }
+                    catch (Exception e)
+                    {
+                        int ij = 0;
+                        ij++;
+                    }
                 }
             }
             else if (serializer is WzNewXmlSerializer)
