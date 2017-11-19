@@ -1,6 +1,6 @@
 [submodule "MapleLib"]
 	path = MapleLib
-	url = https://github.com/haha01haha01/MapleLib.git
+	url = https://github.com/s911415/MapleLib.git
 [submodule "libapng"]
 	path = libapng
 	url = https://github.com/haha01haha01/libapng.git

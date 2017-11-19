@@ -115,9 +115,14 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="MonoGame.Framework">
-      <HintPath>$(MSBuildProgramFiles32)\MonoGame\v3.0\Assemblies\Windows\MonoGame.Framework.dll</HintPath>
+      <HintPath>..\ref\MonoGame.Framework.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL" />
+    <Reference Include="NAudio">
+      <HintPath>..\ref\NAudio.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\ref\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -130,6 +135,9 @@
     <Reference Include="System.XML" />
     <Reference Include="UIAutomationProvider" />
     <Reference Include="UIAutomationTypes" />
+    <Reference Include="WeifenLuo.WinFormsUI.Docking">
+      <HintPath>..\ref\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
@@ -700,10 +708,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\dockpanelsuite\WinFormsUI\WinFormsUI.csproj">
-      <Project>{c75532c4-765b-418e-b09b-46d36b2abdb1}</Project>
-      <Name>WinFormsUI</Name>
-    </ProjectReference>
     <ProjectReference Include="..\HaRepackerLib\HaRepackerLib.csproj">
       <Project>{B68C971F-4B8A-44A3-88D0-6213D1A512E7}</Project>
       <Name>HaRepackerLib</Name>
@@ -715,10 +719,6 @@
     <ProjectReference Include="..\MapleLib\MapleLib.csproj">
       <Project>{28AAB36D-942E-4476-A000-0E9DE380F390}</Project>
       <Name>MapleLib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NAudio\NAudio\NAudio.csproj">
-      <Project>{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}</Project>
-      <Name>NAudio</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -107,7 +107,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-	<Prefer32Bit>false</Prefer32Bit>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <OutputPath>$(SolutionDir)$(Configuration)\$(Platform)\</OutputPath>
@@ -118,9 +118,12 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-	<Prefer32Bit>false</Prefer32Bit>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NAudio">
+      <HintPath>..\ref\NAudio.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -471,10 +474,6 @@
     <ProjectReference Include="..\MapleLib\MapleLib.csproj">
       <Project>{28AAB36D-942E-4476-A000-0E9DE380F390}</Project>
       <Name>MapleLib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NAudio\NAudio\NAudio.csproj">
-      <Project>{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}</Project>
-      <Name>NAudio</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
