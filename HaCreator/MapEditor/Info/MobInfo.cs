@@ -26,7 +26,7 @@ namespace HaCreator.MapEditor.Info
         private WzImage LinkedImage;
 
         public MobInfo(Bitmap image, System.Drawing.Point origin, string id, string name, WzObject parentObject)
-            : base(image, origin, parentObject)
+        : base(image, origin, parentObject)
         {
             this.id = id;
             this.name = name;
@@ -35,6 +35,7 @@ namespace HaCreator.MapEditor.Info
         private void ExtractPNGFromImage(WzImage image)
         {
             WzCanvasProperty mobImage = WzInfoTools.GetMobImage(image);
+
             if (mobImage != null)
             {
                 Image = mobImage.PngProperty.GetPNG(false);
@@ -50,9 +51,10 @@ namespace HaCreator.MapEditor.Info
         public override void ParseImage()
         {
             WzStringProperty link = (WzStringProperty)((WzSubProperty)((WzImage)ParentObject)["info"])["link"];
+
             if (link != null)
             {
-                LinkedImage = (WzImage)Program.WzManager["mob"][link.Value + ".img"];
+                LinkedImage = SearchMobImg(link.Value);
                 ExtractPNGFromImage(LinkedImage);
             }
             else
@@ -63,16 +65,33 @@ namespace HaCreator.MapEditor.Info
 
         public static MobInfo Get(string id)
         {
-            WzImage mobImage = (WzImage)Program.WzManager["mob"][id + ".img"];
+            WzImage mobImage = SearchMobImg(id);
+
             if (mobImage == null)
                 return null;
+
             if (!mobImage.Parsed)
                 mobImage.ParseImage();
+
             if (mobImage.HCTag == null)
                 mobImage.HCTag = MobInfo.Load(mobImage);
+
             MobInfo result = (MobInfo)mobImage.HCTag;
             result.ParseImageIfNeeded();
             return result;
+        }
+
+        private static WzImage SearchMobImg(string id)
+        {
+            foreach (var dir in Program.WzManager.GetDirsStartsWith("mob"))
+            {
+                var image = (WzImage)dir[id + ".img"];
+
+                if (image != null)
+                    return image;
+            }
+
+            return null;
         }
 
         private static MobInfo Load(WzImage parentObject)
@@ -84,25 +103,39 @@ namespace HaCreator.MapEditor.Info
         public override BoardItem CreateInstance(Layer layer, Board board, int x, int y, int z, bool flip)
         {
             if (Image == null) ParseImage();
+
             return new MobInstance(this, board, x, y, UserSettings.Mobrx0Offset, UserSettings.Mobrx1Offset, 20, null, UserSettings.defaultMobTime, flip, false, null, null);
         }
 
         public BoardItem CreateInstance(Board board, int x, int y, int rx0Shift, int rx1Shift, int yShift, string limitedname, int? mobTime, MapleBool flip, MapleBool hide, int? info, int? team)
         {
             if (Image == null) ParseImage();
+
             return new MobInstance(this, board, x, y, rx0Shift, rx1Shift, yShift, limitedname, mobTime, flip, hide, info, team);
         }
 
         public string ID
         {
-            get { return id; }
-            set { this.id = value; }
+            get
+            {
+                return id;
+            }
+            set
+            {
+                this.id = value;
+            }
         }
 
         public string Name
         {
-            get { return name; }
-            set { this.name = value; }
+            get
+            {
+                return name;
+            }
+            set
+            {
+                this.name = value;
+            }
         }
     }
 }

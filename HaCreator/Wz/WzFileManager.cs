@@ -54,21 +54,29 @@ namespace HaCreator.Wz
 
         public bool LoadWzFile(string name)
         {
-            try
+            bool hasError = false;
+            name = name.ToLower();
+
+            foreach (string path in Directory.GetFiles(baseDir, Capitalize(name) + "*.wz"))
             {
-                WzFile wzf = new WzFile(Path.Combine(baseDir, Capitalize(name) + ".wz"), version);
-                wzf.ParseWzFile();
-                name = name.ToLower();
-                wzFiles[name] = wzf;
-                wzFilesUpdated[wzf] = false;
-                wzDirs[name] = new WzMainDirectory(wzf);
-                return true;
+                string fileName = Path.GetFileNameWithoutExtension(path).ToLower();
+
+                try
+                {
+                    WzFile wzf = new WzFile(path, version);
+                    wzf.ParseWzFile();
+                    wzFiles[fileName] = wzf;
+                    wzFilesUpdated[wzf] = false;
+                    wzDirs[fileName] = new WzMainDirectory(wzf);
+                }
+                catch (Exception e)
+                {
+                    HaRepackerLib.Warning.Error("Error initializing " + name + ".wz (" + e.Message + ").\r\nCheck that the directory is valid and the file is not in use.");
+                    hasError = true;
+                }
             }
-            catch (Exception e)
-            {
-                HaRepackerLib.Warning.Error("Error initializing " + name + ".wz (" + e.Message + ").\r\nCheck that the directory is valid and the file is not in use.");
-                return false;
-            }
+
+            return !hasError;
         }
 
         public bool LoadDataWzFile(string name)
@@ -113,8 +121,21 @@ namespace HaCreator.Wz
         public WzDirectory String => GetMainDirectoryByName("string").MainDir;
 
         public bool HasDataFile => File.Exists(Path.Combine(baseDir, "Data.wz"));
-        
+
         public string BaseDir => baseDir;
+
+        public List<WzDirectory> GetDirsStartsWith(string key)
+        {
+            var ret = new List<WzDirectory>();
+
+            foreach (var p in wzDirs)
+            {
+                if (p.Key.StartsWith(key))
+                    ret.Add(p.Value.MainDir);
+            }
+
+            return ret;
+        }
 
         public void ExtractMobFile()
         {
@@ -192,34 +213,66 @@ namespace HaCreator.Wz
 
         public void ExtractMapMarks()
         {
-            WzImage mapHelper = (WzImage)this["map"]["MapHelper.img"];
+            foreach (var o in wzDirs.Keys)
+            {
+                if (o.StartsWith("map"))
+                {
+                    WzImage mapHelper = (WzImage)this[o]["MapHelper.img"];
 
-            foreach (WzCanvasProperty mark in mapHelper["mark"].WzProperties)
-                Program.InfoManager.MapMarks[mark.Name] = mark.PngProperty.GetPNG(false);
+                    if (mapHelper == null) continue;
+
+                    foreach (WzCanvasProperty mark in mapHelper["mark"].WzProperties)
+                        Program.InfoManager.MapMarks[mark.Name] = mark.PngProperty.GetPNG(false);
+                }
+            }
         }
 
         public void ExtractTileSets()
         {
-            WzDirectory tileParent = (WzDirectory)this["map"]["Tile"];
+            foreach (var o in wzDirs.Keys)
+            {
+                if (o.StartsWith("map"))
+                {
+                    WzDirectory tileParent = (WzDirectory)this[o]["Tile"];
 
-            foreach (WzImage tileset in tileParent.WzImages)
-                Program.InfoManager.TileSets[WzInfoTools.RemoveExtension(tileset.Name)] = tileset;
+                    if (tileParent == null) continue;
+
+                    foreach (WzImage tileset in tileParent.WzImages)
+                        Program.InfoManager.TileSets[WzInfoTools.RemoveExtension(tileset.Name)] = tileset;
+                }
+            }
         }
 
         public void ExtractObjSets()
         {
-            WzDirectory objParent = (WzDirectory)this["map"]["Obj"];
+            foreach (var o in wzDirs.Keys)
+            {
+                if (o.StartsWith("map"))
+                {
+                    WzDirectory objParent = (WzDirectory)this[o]["Obj"];
 
-            foreach (WzImage objset in objParent.WzImages)
-                Program.InfoManager.ObjectSets[WzInfoTools.RemoveExtension(objset.Name)] = objset;
+                    if (objParent == null) continue;
+
+                    foreach (WzImage objset in objParent.WzImages)
+                        Program.InfoManager.ObjectSets[WzInfoTools.RemoveExtension(objset.Name)] = objset;
+                }
+            }
         }
 
         public void ExtractBackgroundSets()
         {
-            WzDirectory bgParent = (WzDirectory)this["map"]["Back"];
+            foreach (var o in wzDirs.Keys)
+            {
+                if (o.StartsWith("map"))
+                {
+                    WzDirectory bgParent = (WzDirectory)this[o]["Back"];
 
-            foreach (WzImage bgset in bgParent.WzImages)
-                Program.InfoManager.BackgroundSets[WzInfoTools.RemoveExtension(bgset.Name)] = bgset;
+                    if (bgParent == null) continue;
+
+                    foreach (WzImage bgset in bgParent.WzImages)
+                        Program.InfoManager.BackgroundSets[WzInfoTools.RemoveExtension(bgset.Name)] = bgset;
+                }
+            }
         }
 
         public void ExtractMaps()
@@ -250,46 +303,56 @@ namespace HaCreator.Wz
 
         public void ExtractPortals()
         {
-            WzSubProperty portalParent = (WzSubProperty)this["map"]["MapHelper.img"]["portal"];
-            WzSubProperty editorParent = (WzSubProperty)portalParent["editor"];
-
-            for (int i = 0; i < editorParent.WzProperties.Count; i++)
+            foreach (var o in wzDirs.Keys)
             {
-                WzCanvasProperty portal = (WzCanvasProperty)editorParent.WzProperties[i];
-                Program.InfoManager.PortalTypeById.Add(portal.Name);
-                PortalInfo.Load(portal);
-            }
-
-            WzSubProperty gameParent = (WzSubProperty)portalParent["game"];
-
-            foreach (WzSubProperty portal in gameParent.WzProperties)
-            {
-                if (portal.WzProperties[0] is WzSubProperty)
+                if (o.StartsWith("map"))
                 {
-                    Dictionary<string, Bitmap> images = new Dictionary<string, Bitmap>();
-                    Bitmap defaultImage = null;
+                    var helper = this[o]["MapHelper.img"];
 
-                    foreach (WzSubProperty image in portal.WzProperties)
+                    if (helper == null) continue;
+
+                    WzSubProperty portalParent = (WzSubProperty)helper["portal"];
+                    WzSubProperty editorParent = (WzSubProperty)portalParent["editor"];
+
+                    for (int i = 0; i < editorParent.WzProperties.Count; i++)
                     {
-                        WzSubProperty portalContinue = (WzSubProperty)image["portalContinue"];
-
-                        if (portalContinue == null) continue;
-
-                        Bitmap portalImage = portalContinue["0"].GetBitmap();
-
-                        if (image.Name == "default")
-                            defaultImage = portalImage;
-                        else
-                            images.Add(image.Name, portalImage);
+                        WzCanvasProperty portal = (WzCanvasProperty)editorParent.WzProperties[i];
+                        Program.InfoManager.PortalTypeById.Add(portal.Name);
+                        PortalInfo.Load(portal);
                     }
 
-                    Program.InfoManager.GamePortals.Add(portal.Name, new PortalGameImageInfo(defaultImage, images));
-                }
-            }
+                    WzSubProperty gameParent = (WzSubProperty)portalParent["game"];
 
-            for (int i = 0; i < Program.InfoManager.PortalTypeById.Count; i++)
-            {
-                Program.InfoManager.PortalIdByType[Program.InfoManager.PortalTypeById[i]] = i;
+                    foreach (WzSubProperty portal in gameParent.WzProperties)
+                    {
+                        if (portal.WzProperties[0] is WzSubProperty)
+                        {
+                            Dictionary<string, Bitmap> images = new Dictionary<string, Bitmap>();
+                            Bitmap defaultImage = null;
+
+                            foreach (WzSubProperty image in portal.WzProperties)
+                            {
+                                WzSubProperty portalContinue = (WzSubProperty)image["portalContinue"];
+
+                                if (portalContinue == null) continue;
+
+                                Bitmap portalImage = portalContinue["0"].GetBitmap();
+
+                                if (image.Name == "default")
+                                    defaultImage = portalImage;
+                                else
+                                    images.Add(image.Name, portalImage);
+                            }
+
+                            Program.InfoManager.GamePortals.Add(portal.Name, new PortalGameImageInfo(defaultImage, images));
+                        }
+                    }
+
+                    for (int i = 0; i < Program.InfoManager.PortalTypeById.Count; i++)
+                    {
+                        Program.InfoManager.PortalIdByType[Program.InfoManager.PortalTypeById[i]] = i;
+                    }
+                }
             }
         }
 

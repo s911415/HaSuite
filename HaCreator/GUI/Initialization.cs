@@ -26,6 +26,7 @@ namespace HaCreator.GUI
         public Initialization()
         {
             InitializeComponent();
+
             if (UserSettings.enableDebug)
             {
                 debugButton.Visible = true;
@@ -39,6 +40,7 @@ namespace HaCreator.GUI
                 if (commonPath == path)
                     return true;
             }
+
             return false;
         }
 
@@ -47,20 +49,25 @@ namespace HaCreator.GUI
             ApplicationSettings.MapleVersionIndex = versionBox.SelectedIndex;
             ApplicationSettings.MapleFolderIndex = pathBox.SelectedIndex;
             string wzPath = pathBox.Text;
+
             if (wzPath == "Select Maple Folder")
             {
                 MessageBox.Show("Please select the maple folder.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+
             if (!ApplicationSettings.MapleFolder.Contains(wzPath) && !IsPathCommon(wzPath))
             {
                 ApplicationSettings.MapleFolder = ApplicationSettings.MapleFolder == "" ? wzPath : (ApplicationSettings.MapleFolder + "," + wzPath);
             }
+
             WzMapleVersion fileVersion;
             short version = -1;
+
             if (versionBox.SelectedIndex == 3)
             {
                 string testFile = File.Exists(Path.Combine(wzPath, "Data.wz")) ? "Data.wz" : "Item.wz";
+
                 try
                 {
                     fileVersion = WzTool.DetectMapleVersion(Path.Combine(wzPath, testFile), out version);
@@ -77,7 +84,6 @@ namespace HaCreator.GUI
             }
 
             InitializeWzFiles(wzPath, fileVersion);
-
             Hide();
             Application.DoEvents();
             editor = new HaEditor();
@@ -88,6 +94,7 @@ namespace HaCreator.GUI
         private void InitializeWzFiles(string wzPath, WzMapleVersion fileVersion)
         {
             Program.WzManager = new WzFileManager(wzPath, fileVersion);
+
             if (Program.WzManager.HasDataFile)
             {
                 textBox2.Text = "Initializing Data.wz...";
@@ -148,13 +155,16 @@ namespace HaCreator.GUI
         private void Initialization_Load(object sender, EventArgs e)
         {
             versionBox.SelectedIndex = 0;
+
             try
             {
                 string[] paths = ApplicationSettings.MapleFolder.Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+
                 foreach (string x in paths)
                 {
                     pathBox.Items.Add(x);
                 }
+
                 foreach (string path in commonMaplePaths)
                 {
                     if (Directory.Exists(path))
@@ -162,13 +172,16 @@ namespace HaCreator.GUI
                         pathBox.Items.Add(path);
                     }
                 }
+
                 if (pathBox.Items.Count == 0)
                     pathBox.Items.Add("Select Maple Folder");
             }
             catch
             {
             }
+
             versionBox.SelectedIndex = ApplicationSettings.MapleVersionIndex;
+
             if (pathBox.Items.Count < ApplicationSettings.MapleFolderIndex + 1)
             {
                 pathBox.SelectedIndex = pathBox.Items.Count - 1;
@@ -182,8 +195,10 @@ namespace HaCreator.GUI
         private void button2_Click(object sender, EventArgs e)
         {
             FolderBrowserDialog mapleSelect = new FolderBrowserDialog();
+
             if (mapleSelect.ShowDialog() != DialogResult.OK)
                 return;
+
             pathBox.Items.Add(mapleSelect.SelectedPath);
             pathBox.SelectedIndex = pathBox.Items.Count - 1;
         }
@@ -196,7 +211,6 @@ namespace HaCreator.GUI
             short version = -1;
             WzMapleVersion fileVersion = WzTool.DetectMapleVersion(Path.Combine(wzPath, "Item.wz"), out version);
             InitializeWzFiles(wzPath, fileVersion);
-
             MultiBoard mb = new MultiBoard();
             Board b = new Board(new Microsoft.Xna.Framework.Point(), new Microsoft.Xna.Framework.Point(), mb, null, MapleLib.WzLib.WzStructure.Data.ItemTypes.None, MapleLib.WzLib.WzStructure.Data.ItemTypes.None);
 
@@ -204,27 +218,42 @@ namespace HaCreator.GUI
             {
                 MapLoader loader = new MapLoader();
                 string mapcat = "Map" + mapid.Substring(0, 1);
-                WzImage mapImage = (WzImage)Program.WzManager["map"]["Map"][mapcat][mapid + ".img"];
+                WzImage mapImage = null;
+
+                foreach (var dir in Program.WzManager.GetDirsStartsWith("map"))
+                {
+                    if (dir["Map"] != null && dir["Map"][mapcat] != null)
+                        mapImage = (WzImage)dir["Map"][mapcat][mapid + ".img"];
+
+                    if (mapImage != null) break;
+                }
+
                 if (mapImage == null)
                 {
                     continue;
                 }
+
                 mapImage.ParseImage();
+
                 if (mapImage["info"]["link"] != null)
                 {
                     mapImage.UnparseImage();
                     continue;
                 }
+
                 loader.VerifyMapPropsKnown(mapImage, true);
                 MapInfo info = new MapInfo(mapImage, null, null, null);
                 loader.LoadMisc(mapImage, b);
+
                 if (ErrorLogger.ErrorsPresent())
                 {
                     ErrorLogger.SaveToFile("debug_errors.txt");
                     ErrorLogger.ClearErrors();
                 }
+
                 mapImage.UnparseImage(); // To preserve memory, since this is a very memory intensive test
             }
+
             MessageBox.Show("Done");
         }
 

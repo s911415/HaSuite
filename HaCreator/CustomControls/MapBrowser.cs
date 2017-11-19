@@ -61,15 +61,19 @@ namespace HaCreator.CustomControls
         public void InitializeMaps(bool special)
         {
             mapLogin1 = Program.WzManager["ui"]["MapLogin1.img"] != null;
+
             foreach (KeyValuePair<string, string> map in Program.InfoManager.Maps)
             {
                 maps.Add(map.Key + " - " + map.Value);
             }
+
             maps.Sort();
+
             if (special)
             {
                 maps.Insert(0, "CashShopPreview");
                 maps.Insert(0, "MapLogin");
+
                 if (mapLogin1)
                 {
                     maps.Insert(0, "MapLogin1");
@@ -85,6 +89,7 @@ namespace HaCreator.CustomControls
             TextBox searchBox = (TextBox)sender;
             string tosearch = searchBox.Text.ToLower();
             mapNamesBox.Items.Clear();
+
             if (tosearch == "")
             {
                 mapNamesBox.Items.AddRange(maps.Cast<object>().ToArray<object>());
@@ -99,6 +104,7 @@ namespace HaCreator.CustomControls
                     }
                 }
             }
+
             mapNamesBox.SelectedItem = null;
             mapNamesBox.SelectedIndex = -1;
             mapNamesBox_SelectedIndexChanged(null, null);
@@ -107,9 +113,9 @@ namespace HaCreator.CustomControls
         private void mapNamesBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if ((string)mapNamesBox.SelectedItem == "MapLogin" ||
-                (string)mapNamesBox.SelectedItem == "MapLogin1" ||
-                (string)mapNamesBox.SelectedItem == "CashShopPreview" ||
-                mapNamesBox.SelectedItem == null)
+                    (string)mapNamesBox.SelectedItem == "MapLogin1" ||
+                    (string)mapNamesBox.SelectedItem == "CashShopPreview" ||
+                    mapNamesBox.SelectedItem == null)
             {
                 linkLabel.Visible = false;
                 mapNotExist.Visible = false;
@@ -120,7 +126,16 @@ namespace HaCreator.CustomControls
             {
                 string mapid = ((string)mapNamesBox.SelectedItem).Substring(0, 9);
                 string mapcat = "Map" + mapid.Substring(0, 1);
-                WzImage mapImage = (WzImage)Program.WzManager["map"]["Map"][mapcat][mapid + ".img"];
+                WzImage mapImage = null;
+
+                foreach (var dir in Program.WzManager.GetDirsStartsWith("map"))
+                {
+                    if (dir["Map"] != null && dir["Map"][mapcat] != null)
+                        mapImage = (WzImage)dir["Map"][mapcat][mapid + ".img"];
+
+                    if (mapImage != null) break;
+                }
+
                 if (mapImage == null)
                 {
                     linkLabel.Visible = false;
@@ -145,6 +160,7 @@ namespace HaCreator.CustomControls
                             mapNotExist.Visible = false;
                             load = true;
                             WzCanvasProperty minimap = (WzCanvasProperty)mapImage.GetFromPath("miniMap/canvas");
+
                             if (minimap != null)
                             {
                                 minimapBox.Image = (Image)minimap.PngProperty.GetPNG(false);
@@ -153,12 +169,15 @@ namespace HaCreator.CustomControls
                             {
                                 minimapBox.Image = (Image)new Bitmap(1, 1);
                             }
+
                             load = true;
                         }
                     }
+
                     GC.Collect();
                 }
             }
+
             SelectionChanged.Invoke();
         }
     }

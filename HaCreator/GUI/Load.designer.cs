@@ -17,6 +17,7 @@
             {
                 components.Dispose();
             }
+
             base.Dispose(disposing);
         }
 
@@ -38,9 +39,9 @@
             this.HAMBox = new System.Windows.Forms.TextBox();
             this.HAMSelect = new System.Windows.Forms.RadioButton();
             this.SuspendLayout();
-            // 
+            //
             // loadButton
-            // 
+            //
             this.loadButton.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
             this.loadButton.Enabled = false;
             this.loadButton.Location = new System.Drawing.Point(169, 303);
@@ -49,9 +50,9 @@
             this.loadButton.TabIndex = 9;
             this.loadButton.Text = "Load";
             this.loadButton.Click += new System.EventHandler(this.loadButton_Click);
-            // 
+            //
             // WZSelect
-            // 
+            //
             this.WZSelect.AutoSize = true;
             this.WZSelect.Checked = true;
             this.WZSelect.Location = new System.Drawing.Point(11, 63);
@@ -62,9 +63,9 @@
             this.WZSelect.Text = "WZ";
             this.WZSelect.UseVisualStyleBackColor = true;
             this.WZSelect.CheckedChanged += new System.EventHandler(this.selectionChanged);
-            // 
+            //
             // XMLSelect
-            // 
+            //
             this.XMLSelect.AutoSize = true;
             this.XMLSelect.Location = new System.Drawing.Point(11, 39);
             this.XMLSelect.Name = "XMLSelect";
@@ -73,9 +74,9 @@
             this.XMLSelect.Text = "XML";
             this.XMLSelect.UseVisualStyleBackColor = true;
             this.XMLSelect.CheckedChanged += new System.EventHandler(this.selectionChanged);
-            // 
+            //
             // XMLBox
-            // 
+            //
             this.XMLBox.Enabled = false;
             this.XMLBox.Location = new System.Drawing.Point(64, 38);
             this.XMLBox.Name = "XMLBox";
@@ -83,24 +84,24 @@
             this.XMLBox.TabIndex = 4;
             this.XMLBox.Click += new System.EventHandler(this.browseXML_Click);
             this.XMLBox.TextChanged += new System.EventHandler(this.XMLBox_TextChanged);
-            // 
+            //
             // searchBox
-            // 
+            //
             this.searchBox.Location = new System.Drawing.Point(64, 62);
             this.searchBox.Name = "searchBox";
             this.searchBox.Size = new System.Drawing.Size(200, 20);
             this.searchBox.TabIndex = 7;
-            // 
+            //
             // mapBrowser
-            // 
+            //
             this.mapBrowser.Location = new System.Drawing.Point(11, 86);
             this.mapBrowser.Name = "mapBrowser";
             this.mapBrowser.Size = new System.Drawing.Size(533, 211);
             this.mapBrowser.TabIndex = 8;
             this.mapBrowser.SelectionChanged += new HaCreator.CustomControls.MapBrowser.MapSelectChangedDelegate(this.mapBrowser_SelectionChanged);
-            // 
+            //
             // HAMBox
-            // 
+            //
             this.HAMBox.Enabled = false;
             this.HAMBox.Location = new System.Drawing.Point(64, 12);
             this.HAMBox.Name = "HAMBox";
@@ -108,9 +109,9 @@
             this.HAMBox.TabIndex = 1;
             this.HAMBox.Click += new System.EventHandler(this.browseHAM_Click);
             this.HAMBox.TextChanged += new System.EventHandler(this.HAMBox_TextChanged);
-            // 
+            //
             // HAMSelect
-            // 
+            //
             this.HAMSelect.AutoSize = true;
             this.HAMSelect.Location = new System.Drawing.Point(11, 13);
             this.HAMSelect.Name = "HAMSelect";
@@ -118,9 +119,9 @@
             this.HAMSelect.TabIndex = 0;
             this.HAMSelect.Text = "HAM";
             this.HAMSelect.UseVisualStyleBackColor = true;
-            // 
+            //
             // Load
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(559, 347);
@@ -133,7 +134,7 @@
             this.Controls.Add(this.WZSelect);
             this.Controls.Add(this.loadButton);
             this.DoubleBuffered = true;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
             this.MaximizeBox = false;
@@ -144,7 +145,6 @@
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Load_KeyDown);
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion

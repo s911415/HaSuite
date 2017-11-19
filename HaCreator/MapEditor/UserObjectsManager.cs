@@ -51,16 +51,21 @@ namespace HaCreator.MapEditor
                 Program.InfoManager.ObjectSets[oS] = new WzImage(oS);
                 Program.InfoManager.ObjectSets[oS].Changed = true;
             }
+
             WzImage osimg = Program.InfoManager.ObjectSets[oS];
+
             if (osimg[l0] == null)
             {
                 osimg[l0] = new WzSubProperty();
             }
+
             WzImageProperty l0prop = osimg[l0];
+
             if (l0prop[l1] == null)
             {
                 l0prop[l1] = new WzSubProperty();
             }
+
             l1prop = l0prop[l1];
         }
 
@@ -77,7 +82,6 @@ namespace HaCreator.MapEditor
                 throw new NameAlreadyUsedException();
 
             Point origin = new Point(bmp.Width / 2, bmp.Height / 2);
-
             WzSubProperty prop = new WzSubProperty();
             WzCanvasProperty canvasProp = new WzCanvasProperty();
             canvasProp.PngProperty = new WzPngProperty();
@@ -85,13 +89,11 @@ namespace HaCreator.MapEditor
             canvasProp["origin"] = new WzVectorProperty("", new WzIntProperty("X", origin.X), new WzIntProperty("Y", origin.Y));
             canvasProp["z"] = new WzIntProperty("", 0);
             prop["0"] = canvasProp;
-
             ObjectInfo oi = new ObjectInfo(bmp, origin, oS, l0, l1, name, prop);
             newObjects.Add(oi);
             newObjectsData.Add(name, SaveImageToBytes(bmp));
             SerializeObjects();
             l1prop[name] = prop;
-
             return oi;
         }
 
@@ -110,9 +112,11 @@ namespace HaCreator.MapEditor
                 for (int i = 0; i < board.BoardItems.TileObjs.Count; i++)
                 {
                     LayeredItem li = board.BoardItems.TileObjs[i];
+
                     if (li is ObjectInstance)
                     {
                         ObjectInfo oi = (ObjectInfo)li.BaseInfo;
+
                         if (oi.oS == oS && oi.l0 == l0 && oi.l1 == l1 && oi.l2 == l2)
                         {
                             li.RemoveItem(null);
@@ -121,7 +125,7 @@ namespace HaCreator.MapEditor
                     }
                 }
             }
-            
+
             // Search it in newObjects
             foreach (ObjectInfo oi in newObjects)
             {
@@ -152,9 +156,15 @@ namespace HaCreator.MapEditor
         {
             if (newObjects.Count == 0)
                 return;
-            WzDirectory objsDir = (WzDirectory)Program.WzManager["map"]["Obj"];
-            if (objsDir[oS + ".img"] == null)
-                objsDir[oS + ".img"] = Program.InfoManager.ObjectSets[oS];
+
+            foreach (var dir in Program.WzManager.GetDirsStartsWith("map"))
+            {
+                WzDirectory objsDir = (WzDirectory)dir["Obj"];
+
+                if (objsDir[oS + ".img"] == null)
+                    objsDir[oS + ".img"] = Program.InfoManager.ObjectSets[oS];
+            }
+
             SetOsUpdated();
             newObjects.Clear();
         }
@@ -165,17 +175,20 @@ namespace HaCreator.MapEditor
                 serializedFormCache = null;
             else
                 serializedFormCache = JsonConvert.SerializeObject(newObjectsData);
+
             dirty = true;
         }
 
         public void DeserializeObjects(string data)
         {
             Dictionary<string, byte[]>  newObjectsData2 = JsonConvert.DeserializeObject<Dictionary<string, byte[]>>(data);
+
             foreach (KeyValuePair<string, byte[]> obj in newObjectsData2)
             {
                 if (IsNameValid(obj.Key))
                     Add((Bitmap)Image.FromStream(new MemoryStream(obj.Value)), obj.Key);
             }
+
             SerializeObjects();
         }
 
@@ -191,17 +204,26 @@ namespace HaCreator.MapEditor
 
         public WzImageProperty L1Property
         {
-            get { return l1prop; }
+            get
+            {
+                return l1prop;
+            }
         }
 
         public List<ObjectInfo> NewObjects
         {
-            get { return newObjects; }
+            get
+            {
+                return newObjects;
+            }
         }
 
         public MultiBoard MultiBoard
         {
-            get { return multiBoard; }
+            get
+            {
+                return multiBoard;
+            }
         }
 
         public string SerializedForm
@@ -212,6 +234,16 @@ namespace HaCreator.MapEditor
             }
         }
 
-        public bool Dirty { get { return dirty; } set { dirty = value; } }
+        public bool Dirty
+        {
+            get
+            {
+                return dirty;
+            }
+            set
+            {
+                dirty = value;
+            }
+        }
     }
 }

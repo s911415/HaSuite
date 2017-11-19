@@ -58,14 +58,17 @@ namespace HaCreator.GUI
                     HAMSelect.Checked = true;
                     HAMBox.Text = ApplicationSettings.LastHamPath;
                     break;
+
                 case 1:
                     XMLSelect.Checked = true;
                     XMLBox.Text = ApplicationSettings.LastXmlPath;
                     break;
+
                 case 2:
                     WZSelect.Checked = true;
                     break;
             }
+
             this.mapBrowser.InitializeMaps(true);
         }
 
@@ -105,10 +108,12 @@ namespace HaCreator.GUI
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Title = "Select XML to load...";
             dialog.Filter = "eXtensible Markup Language file (*.xml)|*.xml";
+
             if (dialog.ShowDialog() != DialogResult.OK)
             {
                 return;
             }
+
             XMLBox.Text = dialog.FileName;
             loadButton.Enabled = true;
         }
@@ -118,10 +123,12 @@ namespace HaCreator.GUI
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Title = "Select Map to load...";
             dialog.Filter = "HaCreator Map File (*.ham)|*.ham";
+
             if (dialog.ShowDialog() != DialogResult.OK)
             {
                 return;
             }
+
             HAMBox.Text = dialog.FileName;
             loadButton.Enabled = true;
         }
@@ -132,11 +139,11 @@ namespace HaCreator.GUI
             WaitWindow ww = new WaitWindow("Loading...");
             ww.Show();
             Application.DoEvents();
-
             MapLoader loader = new MapLoader();
             WzImage mapImage = null;
             string mapName = null, streetName = "", categoryName = "";
             WzSubProperty strMapProp = null;
+
             if (HAMSelect.Checked)
             {
                 loader.CreateMapFromHam(multiBoard, Tabs, File.ReadAllText(HAMBox.Text), rightClickHandler);
@@ -180,13 +187,21 @@ namespace HaCreator.GUI
                 {
                     string mapid = mapBrowser.SelectedItem.Substring(0, 9);
                     string mapcat = "Map" + mapid.Substring(0, 1);
-                    mapImage = (WzImage)Program.WzManager["map"]["Map"][mapcat][mapid + ".img"];
+
+                    foreach (var dir in Program.WzManager.GetDirsStartsWith("map"))
+                    {
+                        mapImage = (WzImage)dir["Map"][mapcat][mapid + ".img"];
+
+                        if (mapImage != null) break;
+                    }
+
                     strMapProp = WzInfoTools.GetMapStringProp(mapid);
                     mapName = WzInfoTools.GetMapName(strMapProp);
                     streetName = WzInfoTools.GetMapStreetName(strMapProp);
                     categoryName = WzInfoTools.GetMapCategoryName(strMapProp);
                 }
             }
+
             loader.CreateMapFromImage(mapImage, mapName, streetName, categoryName, strMapProp, Tabs, multiBoard, rightClickHandler);
             DialogResult = DialogResult.OK;
             ww.EndWait();
