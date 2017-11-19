@@ -209,7 +209,17 @@ namespace HaCreator.MapSimulator
                 List<DXObject> frames = new List<DXObject>();
                 while ((frameProp = (WzCanvasProperty)WzInfoTools.GetRealProperty(source[(i++).ToString()])) != null)
                 {
-                    int? delay = InfoTool.GetOptionalInt(frameProp["delay"]);
+                    int? delay = null;
+                    try
+                    {
+                        delay = InfoTool.GetOptionalInt(frameProp["delay"]);
+                    }
+                    catch (Exception e)
+                    {
+                        int ij = 0;
+                        ij++;
+                    }
+
                     if (delay == null) delay = 100;
                     if (frameProp.MSTag == null)
                     {
