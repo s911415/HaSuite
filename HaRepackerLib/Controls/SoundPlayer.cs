@@ -46,7 +46,9 @@ namespace HaRepackerLib.Controls
         private void AudioTimer_Tick(object sender, EventArgs e)
         {
             if (currAudio == null) return;
-            TimeBar.Value = (int)currAudio.Position;
+
+            if (TimeBar.Maximum >= currAudio.Position) TimeBar.Value = (int)currAudio.Position;
+
             TimeSpan time = TimeSpan.FromSeconds(currAudio.Position);
             CurrentPositionLabel.Text = Convert.ToString(time.Minutes).PadLeft(2, '0') + ":" + Convert.ToString(time.Seconds).PadLeft(2, '0') + " /";
         }
