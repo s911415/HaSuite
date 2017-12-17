@@ -26,7 +26,7 @@ namespace HaCreator
         public static WzFileManager WzManager;
         public static WzInformationManager InfoManager;
         public static WzSettingsManager SettingsManager;
-        public const string Version = "2.1.1";
+        public const string Version = "2.1.2";
         public static bool AbortThreads = false;
         public static bool Restarting;
 
@@ -34,8 +34,10 @@ namespace HaCreator
         {
             string appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             string our_folder = Path.Combine(appdata, "HaCreator");
+
             if (!Directory.Exists(our_folder))
                 Directory.CreateDirectory(our_folder);
+
             return our_folder;
         }
 
@@ -54,7 +56,6 @@ namespace HaCreator
 #if !DEBUG
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 #endif
-
             Properties.Resources.Culture = CultureInfo.CurrentCulture;
             InfoManager = new WzInformationManager();
             SettingsManager = new WzSettingsManager(GetLocalSettingsPath(), typeof(UserSettings), typeof(ApplicationSettings), typeof(Microsoft.Xna.Framework.Color));
@@ -63,7 +64,6 @@ namespace HaCreator
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-
             // Program run here
             GUI.Initialization initForm = new GUI.Initialization();
             Application.Run(initForm);
@@ -71,7 +71,9 @@ namespace HaCreator
             // Shutdown
             if (initForm.editor != null)
                 initForm.editor.hcsm.backupMan.ClearBackups();
+
             SettingsManager.Save();
+
             if (Restarting)
             {
                 Application.Restart();

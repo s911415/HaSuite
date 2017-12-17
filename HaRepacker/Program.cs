@@ -24,7 +24,7 @@ namespace HaRepacker
 {
     public static class Program
     {
-        public const string Version = "4.2.4";
+        public const string Version = "4.2.5";
         public static WzFileManager WzMan = new HaRepackerLib.WzFileManager();
         public static WzSettingsManager SettingsManager;
         public static NamedPipeServerStream pipe;
@@ -37,15 +37,15 @@ namespace HaRepacker
         static void Main(string[] args)
         {
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-
             CultureInfo ci = GetMainCulture(CultureInfo.CurrentCulture);
             Properties.Resources.Culture = ci;
             Thread.CurrentThread.CurrentCulture = ci;
             Thread.CurrentThread.CurrentUICulture = ci;
-
             string wzToLoad = null;
+
             if (args.Length > 0)
                 wzToLoad = args[0];
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
@@ -58,21 +58,24 @@ namespace HaRepacker
         {
             if (!ci.Name.Contains('-'))
                 return ci;
+
             switch (ci.Name.Split("-".ToCharArray())[0])
             {
                 case "en":
                     return new CultureInfo("en");
+
                 case "zh":
                     if (ci.EnglishName.Contains("Simplified"))
                         return new CultureInfo("zh-CHS");
                     else
                         return new CultureInfo("zh-CHT");
+
                 default:
                     return ci;
             }
         }
 
-        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e) 
+        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             new ThreadExceptionDialog((Exception)e.ExceptionObject).ShowDialog();
             Environment.Exit(-1);
@@ -82,8 +85,10 @@ namespace HaRepacker
         {
             string appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             string our_folder = Path.Combine(appdata, "HaRepacker");
+
             if (!Directory.Exists(our_folder))
                 Directory.CreateDirectory(our_folder);
+
             return our_folder;
         }
 
@@ -96,6 +101,7 @@ namespace HaRepacker
         {
             //bool value to hold our return value
             bool isAdmin;
+
             try
             {
                 //get the currently logged in user
@@ -107,6 +113,7 @@ namespace HaRepacker
             {
                 isAdmin = false;
             }
+
             return isAdmin;
         }
 
@@ -114,6 +121,7 @@ namespace HaRepacker
         {
             SettingsManager = new WzSettingsManager(GetLocalSettingsPath(), typeof(UserSettings), typeof(ApplicationSettings));
             bool loaded = false;
+
             for (int i = 0; i < 5; i++)
             {
                 try
@@ -127,18 +135,22 @@ namespace HaRepacker
                     Thread.Sleep(1000);
                 }
             }
+
             if (!loaded)
             {
                 Warning.Error(HaRepacker.Properties.Resources.ProgramLoadSettingsError);
                 return true;
             }
+
             bool firstRun = ApplicationSettings.FirstRun;
+
             if (ApplicationSettings.FirstRun)
             {
                 //new FirstRunForm().ShowDialog();
                 ApplicationSettings.FirstRun = false;
                 SettingsManager.Save();
             }
+
             if (UserSettings.AutoAssociate && from_internal && IsUserAdministrator())
             {
                 string path = Application.ExecutablePath;
@@ -148,6 +160,7 @@ namespace HaRepacker
                 wzKey.CreateSubKey("DefaultIcon").SetValue("", path + ",1");
                 wzKey.CreateSubKey("shell\\open\\command").SetValue("", "\"" + path + "\" \"%1\"");
             }
+
             return firstRun;
         }
 
@@ -157,10 +170,12 @@ namespace HaRepacker
             {
                 pipe.Close();
             }
+
             if (disposeFiles)
             {
                 WzMan.Terminate();
             }
+
             SettingsManager.Save();
         }
     }
